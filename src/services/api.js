@@ -2,8 +2,8 @@
 // In a real application, these would make actual HTTP requests to a backend server
 
 // Base URL for API calls
-const API_BASE_URL = 'https://api.uclprojecthub.com/api';
-
+// Use environment variable for API URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.uclprojecthub.com/api';
 // Helper function for making API requests
 const apiRequest = async (endpoint, method = 'GET', data = null) => {
   const url = `${API_BASE_URL}${endpoint}`;
