@@ -1,9 +1,6 @@
-// This file contains placeholder functions for API calls
-// In a real application, these would make actual HTTP requests to a backend server
+// src/services/api.js
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
-// Base URL for API calls
-// Use environment variable for API URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.uclprojecthub.com/api';
 // Helper function for making API requests
 const apiRequest = async (endpoint, method = 'GET', data = null) => {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -13,9 +10,9 @@ const apiRequest = async (endpoint, method = 'GET', data = null) => {
   };
   
   // Add authorization header if user is logged in
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (user && user.token) {
-    headers['Authorization'] = `Bearer ${user.token}`;
+  const token = localStorage.getItem('token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
   
   const options = {
@@ -28,17 +25,17 @@ const apiRequest = async (endpoint, method = 'GET', data = null) => {
   }
   
   try {
-    // In a real app, this would be a fetch call
-    // For now, we'll just log the request and return mock data
-    console.log(`API Request: ${method} ${url}`, data);
+    const response = await fetch(url, options);
+    const result = await response.json();
     
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    if (!response.ok) {
+      throw new Error(result.error || 'API request failed');
+    }
     
-    return { success: true, data: {} };
+    return result;
   } catch (error) {
     console.error('API Error:', error);
-    throw new Error('API request failed');
+    throw error;
   }
 };
 
@@ -54,10 +51,6 @@ export const authApi = {
   
   verifyMfa: (code) => {
     return apiRequest('/auth/verify-mfa', 'POST', { code });
-  },
-  
-  logout: () => {
-    return apiRequest('/auth/logout', 'POST');
   }
 };
 
@@ -81,14 +74,6 @@ export const projectsApi = {
   
   delete: (id) => {
     return apiRequest(`/projects/${id}`, 'DELETE');
-  },
-  
-  assignUser: (projectId, userId) => {
-    return apiRequest(`/projects/${projectId}/assign`, 'POST', { userId });
-  },
-  
-  removeUser: (projectId, userId) => {
-    return apiRequest(`/projects/${projectId}/users/${userId}`, 'DELETE');
   }
 };
 
@@ -113,36 +98,5 @@ export const objectivesApi = {
   
   delete: (id) => {
     return apiRequest(`/objectives/${id}`, 'DELETE');
-  },
-  
-  assignUser: (objectiveId, userId) => {
-    return apiRequest(`/objectives/${objectiveId}/assign`, 'POST', { userId });
-  },
-  
-  removeUser: (objectiveId, userId) => {
-    return apiRequest(`/objectives/${objectiveId}/users/${userId}`, 'DELETE');
-  },
-  
-  markComplete: (id) => {
-    return apiRequest(`/objectives/${id}/complete`, 'POST');
-  },
-  
-  markIncomplete: (id) => {
-    return apiRequest(`/objectives/${id}/incomplete`, 'POST');
-  }
-};
-
-// Users API
-export const usersApi = {
-  getAll: () => {
-    return apiRequest('/users');
-  },
-  
-  getById: (id) => {
-    return apiRequest(`/users/${id}`);
-  },
-  
-  getCurrentUser: () => {
-    return apiRequest('/users/me');
   }
 };
